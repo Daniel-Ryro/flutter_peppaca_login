@@ -15,10 +15,10 @@ class ApiSignin {
     await hiveManager.initBox();
 
     final Map<String, dynamic> queryParams = {
-      'Email': 'kwliew09@gmail.com',
-      'CustomerID': '1', 
-      'Password': '1234',
-      'Language': 'cn',
+      'Email': userName,
+      'CustomerID': '', 
+      'Password': passWord,
+      'Language': 'en',
     };
     Map<String, dynamic> request = apiService.getRequest("SignIn",
         queryParams['Password'], queryParams['CustomerID'], 2, queryParams);
@@ -87,15 +87,14 @@ class ApiSignin {
 
   Future<Map<String, dynamic>> resetPassword(
       String userName, String passWord) async {
-    await hiveManager.initBox();
-
-
+        await hiveManager.initBox();
     final Map<String, dynamic> queryParams = {
       'Email': userName,
-      'CustomerID': '', 
+      'CustomerID': hiveManager.getCustomerID(),
       'Password': passWord,
       'Language': hiveManager.getLanguage(),
     };
+
 
     Map<String, dynamic> request = apiService.getRequest("ResetPassword",
         queryParams['Password'], queryParams['CustomerID'], 2, queryParams);

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_caraio/utils/commun.dart';
 
 import '../utils/typography.dart';
 
@@ -17,6 +18,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _confirmPasswordController =
       TextEditingController();
   bool _isPasswordVisible = false;
+  
+  
 
   @override
   void dispose() {
@@ -30,6 +33,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (_formKey.currentState!.validate()) {
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Successfully registered')));
+      Navigator.pop(context);
     }
   }
 
@@ -94,6 +98,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
         if (value == null || value.isEmpty) {
           return 'Email can’t be blank.';
         }
+        if (!ValidationUtil.isValidEmail(value)) {
+          return 'Enter a valid email address.';
+        }
         return null;
       },
     );
@@ -119,6 +126,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
       validator: (value) {
         if (value == null || value.isEmpty) {
           return 'Password can’t be blank.';
+        }
+        if (!ValidationUtil.passwordMeetsRequirements(value)) {
+          return 'Password does not meet requirements.';
         }
         return null;
       },

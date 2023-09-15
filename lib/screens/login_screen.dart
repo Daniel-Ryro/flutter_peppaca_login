@@ -63,9 +63,9 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
-  Future<void> _attemptLogin(String email, String password) async {
+  Future<void> _attemptLogin(String userName, String passWord) async {
     try {
-      final response = await apiSignin.userSignIn(email, password);
+      final response = await apiSignin.userSignIn(userName, passWord);
 
       if (!mounted) return;
 
@@ -78,7 +78,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void _handleApiResponse(Map<String, dynamic> response) {
     response['httpStatus'] == "OK"
         ? ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('Login successful!')))
+            .showSnackBar(const SnackBar(content: Text('Login successful!.')))
         : _handleApiError(response);
   }
 

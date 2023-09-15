@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_caraio/widgets/ballon_dialog.dart';
 import '../api/api_signin.dart';
+import '../utils/commun.dart';
 import '../utils/typography.dart';
 import '../widgets/widget_dropdown_page.dart';
 
@@ -21,6 +22,9 @@ class _ChangePasswordState extends State<ChangePassword> {
   final GlobalKey _passwordFieldKey = GlobalKey();
   OverlayEntry? _overlayEntry;
   final FocusNode _passwordFocusNode = FocusNode();
+  String? _emailError;
+  String? _newPasswordError;
+  String? _confirmPasswordError;
 
   @override
   void initState() {
@@ -59,39 +63,71 @@ class _ChangePasswordState extends State<ChangePassword> {
   }
 
   void _hideBalloon() => _removeBalloon();
+  void _clearFields() {
+    _currentEmailController.clear();
+    _newPasswordController.clear();
+    _confirmPasswordController.clear();
+  }
 
   Future<void> _changePassword() async {
-    final currentEmail = _currentEmailController.text;
+    final userName = _currentEmailController.text;
     final newPassword = _newPasswordController.text;
     final confirmPassword = _confirmPasswordController.text;
+    setState(() {
+      // Resetting previous error messages
+      _emailError = null;
+      _newPasswordError = null;
+      _confirmPasswordError = null;
+    });
 
-    if (newPassword != confirmPassword) {
-      _showSnackbar('New password and confirmation do not match!');
+    if (_currentEmailController.text.isEmpty) {
+      setState(() {
+        _emailError = 'Email address cannot be blank!';
+      });
+      return;
+    }
+    if (!ValidationUtil.isValidEmail(_currentEmailController.text)) {
+      setState(() {
+        _emailError = 'Please enter a valid email address!';
+      });
       return;
     }
 
-    try {
-      final responseChange =
-          await apiSignin.resetPassword(currentEmail, newPassword);
-      if (responseChange['httpStatus'] == 'OK') {
-        _showSnackbar('Password changed successfully!');
-        _showDropdownDialog();
-      } else {
-        _showSnackbar(
-            responseChange['httpComment'] ?? 'Error changing password!');
-      }
-    } catch (e) {
-      _showSnackbar('Error changing password. Please try again later.');
+    if (_newPasswordController.text.isEmpty) {
+      setState(() {
+        _newPasswordError = 'New password cannot be blank!';
+      });
+      return;
     }
+
+    if (newPassword != confirmPassword) {
+      setState(() {
+        _confirmPasswordError = 'Password doesn’t match.';
+      });
+      return;
+    }
+
+    final result = await _showDropdownDialog();
+
+    if (result == true) {
+      try {
+        final responseChange =
+            await apiSignin.resetPassword(userName, newPassword);
+        if (responseChange['httpStatus'] == 'OK') {
+          _showSnackbar('Password changed successfully!');
+        } else {
+          _showSnackbar(
+              responseChange['httpComment'] ?? 'Error changing password!');
+        }
+      } catch (e) {
+        _showSnackbar('Error changing password. Please try again later.');
+      }
+    }
+    _clearFields();
   }
 
-  void _showSnackbar(String message) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(message)));
-  }
-
-  void _showDropdownDialog() {
-    showDialog(
+  Future<bool?> _showDropdownDialog() async {
+    return showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
         return DropdownPage(
@@ -104,6 +140,11 @@ class _ChangePasswordState extends State<ChangePassword> {
         );
       },
     );
+  }
+
+  void _showSnackbar(String message) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -119,7 +160,7 @@ class _ChangePasswordState extends State<ChangePassword> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              const SizedBox(height: 50), 
+              const SizedBox(height: 50),
               _buildHeader(),
               const SizedBox(height: 20),
               _buildEmailField(),
@@ -156,6 +197,7 @@ class _ChangePasswordState extends State<ChangePassword> {
     return _buildTextField(
       controller: _currentEmailController,
       labelText: 'Email address',
+      errorText: _emailError,
     );
   }
 
@@ -168,7 +210,7 @@ class _ChangePasswordState extends State<ChangePassword> {
       isObscure: !_isPasswordVisible,
       onTap: _showBalloon,
       onChanged: (text) {
-        if (_passwordMeetsRequirements(text)) _hideBalloon();
+        if (!ValidationUtil.passwordMeetsRequirements(text)) _hideBalloon();
       },
       suffixIcon: IconButton(
         icon:
@@ -176,6 +218,7 @@ class _ChangePasswordState extends State<ChangePassword> {
         onPressed: () =>
             setState(() => _isPasswordVisible = !_isPasswordVisible),
       ),
+      errorText: _newPasswordError,
     );
   }
 
@@ -184,12 +227,14 @@ class _ChangePasswordState extends State<ChangePassword> {
       controller: _confirmPasswordController,
       labelText: 'Confirm new password',
       isObscure: true,
+      errorText: _confirmPasswordError,
     );
   }
 
   Widget _buildTextField({
     required TextEditingController controller,
     required String labelText,
+    String? errorText,
     FocusNode? focusNode,
     bool isObscure = false,
     Widget? suffixIcon,
@@ -204,6 +249,7 @@ class _ChangePasswordState extends State<ChangePassword> {
       obscureText: isObscure,
       decoration: InputDecoration(
         labelText: labelText,
+        errorText: errorText,
         border: const OutlineInputBorder(
           borderRadius: BorderRadius.all(Radius.circular(15.0)),
         ),
@@ -245,13 +291,6 @@ class _ChangePasswordState extends State<ChangePassword> {
   }
 
   void _handleUpdatePress() {
-    _showDropdownDialog();
-  }
-
-  bool _passwordMeetsRequirements(String password) {
-    return password.contains(RegExp(r'[A-Z]')) &&
-        password.contains(RegExp(r'[0-9]')) &&
-        password.contains(RegExp(r'[~`!@#\$%^&*()-_+={}[]|;:"<>,./?]')) &&
-        password.length >= 8;
+    _changePassword();
   }
 }
