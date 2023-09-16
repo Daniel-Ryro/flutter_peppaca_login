@@ -88,7 +88,6 @@ class _LoginScreenState extends State<LoginScreen> {
     _failedLoginAttempts++;
     if (_failedLoginAttempts >= 5) {
       _showLoginAttemptWarning();
-      _failedLoginAttempts = 0;
     }
   }
 
@@ -100,7 +99,13 @@ class _LoginScreenState extends State<LoginScreen> {
   void _showLoginAttemptWarning() {
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (BuildContext context) {
+        Future.delayed(Duration(seconds: 30), () {
+          if (Navigator.canPop(context)) {
+            Navigator.pop(context);
+          }
+        });
         return const ModernDialog(
           title: "",
           contentItems: [

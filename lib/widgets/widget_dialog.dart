@@ -13,25 +13,36 @@ class ModernDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Obtenha as dimensões do dispositivo
+    final Size screenSize = MediaQuery.of(context).size;
+    
     return AlertDialog(
-      shape: const RoundedRectangleBorder(
-        side: BorderSide(
-            color: AppColors.primaryColor, width: 2.0), 
+      shape: RoundedRectangleBorder(
+        side: BorderSide(color: AppColors.primaryColor, width: 2.0),
         borderRadius: BorderRadius.all(Radius.circular(20.0)),
       ),
       backgroundColor: Colors.white,
       title: Text(
         title,
-        style: const TextStyle(
+        style: TextStyle(
           color: Colors.black,
           fontWeight: FontWeight.bold,
-          fontSize: 20,
+          fontSize: 0.025 * screenSize.width,  // ~2.5% da largura da tela
         ),
       ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: contentItems.map(_buildRequirementText).toList(),
+      content: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: contentItems.map(_buildRequirementText).toList(),
+              ),
+            ),
+          );
+        },
       ),
       actions: [
         Align(
@@ -49,10 +60,13 @@ class ModernDialog extends StatelessWidget {
                 ),
               ),
               padding: MaterialStateProperty.all<EdgeInsets>(
-                const EdgeInsets.symmetric(vertical: 5.0, horizontal: 20.0),
+                EdgeInsets.symmetric(
+                  vertical: 0.01 * screenSize.height,   // ~1% da altura da tela
+                  horizontal: 0.05 * screenSize.width, // ~5% da largura da tela
+                ),
               ),
               textStyle: MaterialStateProperty.all<TextStyle>(
-                const TextStyle(fontSize: 18.0),
+                TextStyle(fontSize: 0.022 * screenSize.width), // ~2.2% da largura da tela
               ),
             ),
             child: Text(

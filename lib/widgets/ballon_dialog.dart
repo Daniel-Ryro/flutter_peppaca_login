@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_caraio/utils/typography.dart';
 import 'package:flutter_caraio/widgets/ballon_painter.dart';
 
-class PasswordBalloon extends StatelessWidget {
+class PasswordBalloon extends StatefulWidget {
   final GlobalKey _passwordFieldKey;
   final TextStyle? textStyle;
 
@@ -14,9 +14,27 @@ class PasswordBalloon extends StatelessWidget {
         super(key: key);
 
   @override
+  State<PasswordBalloon> createState() => _PasswordBalloonState();
+}
+
+class _PasswordBalloonState extends State<PasswordBalloon> {
+  bool _isVisible = true;
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(Duration(seconds: 30), () {
+      if (mounted) {
+        setState(() {
+          _isVisible = false;
+        });
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final RenderBox renderBox =
-        _passwordFieldKey.currentContext!.findRenderObject() as RenderBox;
+    final RenderBox renderBox = widget._passwordFieldKey.currentContext!
+        .findRenderObject() as RenderBox;
     final size = renderBox.size;
     final offset = renderBox.localToGlobal(Offset(0, size.height + 5));
 
@@ -43,7 +61,7 @@ class PasswordBalloon extends StatelessWidget {
               '• One number\n'
               '• One special character (~`!@#\$%^&*()-_+={}[]|\\;:"<>,./?)\n'
               '• 8 characters minimum',
-              style: textStyle ?? AppTextStyles.regularAlert,
+              style: widget.textStyle ?? AppTextStyles.regularAlert,
             ),
           ),
         ),

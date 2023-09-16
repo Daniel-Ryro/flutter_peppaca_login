@@ -30,17 +30,31 @@ class _ChangePasswordState extends State<ChangePassword> {
   void initState() {
     super.initState();
     _passwordFocusNode.addListener(_hideBalloonOnFocusLoss);
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+      FocusScope.of(context).addListener(_focusChangeHandler);
+    });
   }
 
   @override
   void dispose() {
     _passwordFocusNode.removeListener(_hideBalloonOnFocusLoss);
+    FocusScope.of(context).removeListener(_focusChangeHandler);
     _passwordFocusNode.dispose();
     super.dispose();
   }
 
   void _hideBalloonOnFocusLoss() {
+    if (!_passwordFocusNode.hasFocus &&
+        ValidationUtil.passwordMeetsRequirements(_newPasswordController.text)) {
+      _removeBalloon();
+    }
     if (!_passwordFocusNode.hasFocus) _removeBalloon();
+  }
+
+  void _focusChangeHandler() {
+    if (!_passwordFocusNode.hasFocus) {
+      _removeBalloon();
+    }
   }
 
   void _showBalloon() {
@@ -74,7 +88,6 @@ class _ChangePasswordState extends State<ChangePassword> {
     final newPassword = _newPasswordController.text;
     final confirmPassword = _confirmPasswordController.text;
     setState(() {
-      // Resetting previous error messages
       _emailError = null;
       _newPasswordError = null;
       _confirmPasswordError = null;
@@ -147,6 +160,51 @@ class _ChangePasswordState extends State<ChangePassword> {
         .showSnackBar(SnackBar(content: Text(message)));
   }
 
+  void areFieldsValid() {
+    // Reset all error messages first
+    setState(() {
+      _emailError = null;
+      _newPasswordError = null;
+      _confirmPasswordError = null;
+    });
+
+    if (_currentEmailController.text.isEmpty) {
+      setState(() {
+        _emailError = 'Email address cannot be blank!';
+      });
+      return;
+    }
+
+    if (!ValidationUtil.isValidEmail(_currentEmailController.text)) {
+      setState(() {
+        _emailError = 'Please enter a valid email address!';
+      });
+      return;
+    }
+
+    if (_newPasswordController.text.isEmpty) {
+      setState(() {
+        _newPasswordError = 'New password cannot be blank!';
+      });
+      return;
+    }
+
+    if (_newPasswordController.text != _confirmPasswordController.text) {
+      setState(() {
+        _confirmPasswordError = 'Passwords don’t match.';
+      });
+      return;
+    }
+
+    if (!ValidationUtil.passwordMeetsRequirements(
+        _newPasswordController.text)) {
+      setState(() {
+        _newPasswordError = 'The password does not meet the required criteria.';
+      });
+      return;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -210,7 +268,11 @@ class _ChangePasswordState extends State<ChangePassword> {
       isObscure: !_isPasswordVisible,
       onTap: _showBalloon,
       onChanged: (text) {
-        if (!ValidationUtil.passwordMeetsRequirements(text)) _hideBalloon();
+        if (!ValidationUtil.passwordMeetsRequirements(text)) {
+          _showBalloon();
+        } else {
+          _hideBalloon();
+        }
       },
       suffixIcon: IconButton(
         icon:
@@ -291,6 +353,11 @@ class _ChangePasswordState extends State<ChangePassword> {
   }
 
   void _handleUpdatePress() {
-    _changePassword();
+    areFieldsValid();
+    if (_emailError == null &&
+        _newPasswordError == null &&
+        _confirmPasswordError == null) {
+      _changePassword();
+    }
   }
 }
