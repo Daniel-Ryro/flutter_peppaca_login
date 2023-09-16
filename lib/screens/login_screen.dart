@@ -101,7 +101,7 @@ class _LoginScreenState extends State<LoginScreen> {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        Future.delayed(Duration(seconds: 30), () {
+        Future.delayed(const Duration(seconds: 30), () {
           if (Navigator.canPop(context)) {
             Navigator.pop(context);
           }

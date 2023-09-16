@@ -30,7 +30,7 @@ class _ChangePasswordState extends State<ChangePassword> {
   void initState() {
     super.initState();
     _passwordFocusNode.addListener(_hideBalloonOnFocusLoss);
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       FocusScope.of(context).addListener(_focusChangeHandler);
     });
   }

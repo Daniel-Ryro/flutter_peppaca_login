@@ -17,7 +17,7 @@ class ModernDialog extends StatelessWidget {
     final Size screenSize = MediaQuery.of(context).size;
     
     return AlertDialog(
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         side: BorderSide(color: AppColors.primaryColor, width: 2.0),
         borderRadius: BorderRadius.all(Radius.circular(20.0)),
       ),

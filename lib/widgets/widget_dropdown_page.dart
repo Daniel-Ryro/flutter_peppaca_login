@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_caraio/screens/login_screen.dart';
 import 'package:flutter_caraio/utils/load_json.dart';
 import 'package:flutter_caraio/widgets/widget_dialog.dart';
 

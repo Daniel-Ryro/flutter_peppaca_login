@@ -6,7 +6,7 @@ class PasswordBalloon extends StatefulWidget {
   final GlobalKey _passwordFieldKey;
   final TextStyle? textStyle;
 
-  PasswordBalloon({
+  const PasswordBalloon({
     required GlobalKey passwordFieldKey,
     this.textStyle,
     Key? key,
@@ -22,7 +22,7 @@ class _PasswordBalloonState extends State<PasswordBalloon> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration(seconds: 30), () {
+    Future.delayed(const Duration(seconds: 30), () {
       if (mounted) {
         setState(() {
           _isVisible = false;
